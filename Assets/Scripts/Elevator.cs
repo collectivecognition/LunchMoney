@@ -10,7 +10,7 @@ public class Elevator : MonoBehaviour {
 	private int targetFloor = -1;
 	private float startTime;
 	private float distance;
-	private float[] floors = new float[] {5.5f, 9.34f, 13.18f};
+	private float[] floors = new float[] {1f, 4.85f, 8.7f};
 
 	// Use this for initialization
 	void Start () {
