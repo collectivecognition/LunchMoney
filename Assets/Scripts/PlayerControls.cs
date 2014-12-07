@@ -41,7 +41,7 @@ public class PlayerControls : MonoBehaviour {
 	void FixedUpdate () {
 			if(!pickingUp){
 				float direction = -Mathf.Sign(transform.localScale.x);
-				float up = !onElevator ? Input.GetAxis ("Vertical") * speed.z : 0;
+				float up = Input.GetAxis ("Vertical") * speed.z;
 				// transform.Translate(direction * Time.deltaTime);
 				rigidbody.velocity = new Vector3 (Input.GetAxis ("Horizontal") * speed.x, rigidbody.velocity.y, up);
 

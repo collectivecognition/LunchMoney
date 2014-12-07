@@ -27,20 +27,24 @@ public class Elevator : MonoBehaviour {
 
 	void Update () {
 		if(playerControls.onElevator){
-			if(Input.GetAxis("Vertical") > 0 && targetFloor == -1 && floor < 2){
-				ChangeFloor (floor + 1);
-			}
+			if(targetFloor == -1){
+				if(Input.GetKeyDown (KeyCode.Alpha1)){
+					ChangeFloor (0);
+				}
 
-			if(Input.GetAxis("Vertical") < 0 && targetFloor == -1 && floor > 0){
-				ChangeFloor (floor - 1);
+				if(Input.GetKeyDown (KeyCode.Alpha2)){
+					ChangeFloor (1);
+				}
+
+				if(Input.GetKeyDown (KeyCode.Alpha3)){
+					ChangeFloor (2);
+				}
 			}
 		}
 
 		if(targetFloor != -1){
 			float y = Mathf.Lerp(floors[floor], floors[targetFloor], (Time.time - startTime) * speed / distance);
 			transform.localPosition = new Vector3(transform.localPosition.x, y, transform.localPosition.z);
-
-			Debug.Log ("moving:" + y);
 
 			if(transform.localPosition.y == floors[targetFloor]){
 				floor = targetFloor;
