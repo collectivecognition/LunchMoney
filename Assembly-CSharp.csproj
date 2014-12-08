@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\BullySpawner.cs" />
+     <Compile Include="Assets\Scripts\DeadGirl.cs" />
      <Compile Include="Assets\Scripts\Edible.cs" />
      <Compile Include="Assets\Scripts\Elevator.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />

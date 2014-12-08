@@ -9,7 +9,7 @@ public class Util
 	public static float[] floorMaxZ = new float[] {-5.7f};
 
 	public static Transform FindClosestWithTag(Transform player, string tag, Vector3 maxDistance){
-		GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pickup");
+		GameObject[] pickups = GameObject.FindGameObjectsWithTag(tag);
 		Transform closest = null;
 		float closestDistance = Mathf.Infinity;
 		for(int ii = 0; ii < pickups.Length; ii++){

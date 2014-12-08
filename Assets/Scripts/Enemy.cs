@@ -171,14 +171,14 @@ public class Enemy : MonoBehaviour {
 				player.GetComponent<PlayerControls>().Hit(0.5f, Mathf.Sign (player.transform.position.x - transform.position.x));
 			}
 
-			state = null;
+			state = "wandering";
+			wanderPosition = Vector3.zero;
 		}
 	}
 
 	private void ComeAtMeBro() {
 		float distance = Vector3.Distance (transform.position, player.transform.position);
 		if(distance > 0.5f){
-			Debug.Log (player);
 			MoveToward (player.transform.position, attackSpeed);
 		}else{
 			animator.SetBool ("walking", false);

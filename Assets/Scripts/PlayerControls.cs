@@ -19,9 +19,15 @@ public class PlayerControls : MonoBehaviour {
 	private float pickupStartTime;
 	private float hitDelay = 0.5f;
 	private float hitTime = 0f;
+	private float dieTime = 0f;
+	private float dieDelay = 0.3f;
 
+	public Transform deadGirl;
 	public Text coinsText;
 	public AudioClip coinPickupSound;
+	public AudioClip turkeyEatSound;
+	public AudioClip hitSound;
+	public AudioClip dieSound;
 
 	[HideInInspector] public float health = 3f;
 	[HideInInspector] public int coins = 0;
@@ -50,113 +56,151 @@ public class PlayerControls : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-			if(!pickingUp && (hitTime == 0 || Time.time - hitTime >= hitDelay)){
-				float direction = transform.localEulerAngles.y == 0 ? -1 : 1;
-				float up = Input.GetAxis ("Vertical") * speed.z;
-	
-				// Apply movement velocity
+		if(health <= 0 && Time.time - dieTime >= dieDelay && gameObject.renderer.enabled == true){
+			Transform deadGirlObj = (Transform)GameObject.Instantiate(deadGirl);
+			deadGirlObj.rigidbody.velocity = rigidbody.velocity;
+			deadGirlObj.transform.position = transform.position;
+			// gameObject.SetActive (false);
+			gameObject.renderer.enabled = false;
+		}
+		if(health > 0 && !pickingUp && (hitTime == 0 || Time.time - hitTime >= hitDelay)){
+			float direction = transform.localEulerAngles.y == 0 ? -1 : 1;
+			float up = Input.GetAxis ("Vertical") * speed.z;
 
-				rigidbody.velocity = new Vector3 (Input.GetAxis ("Horizontal") * speed.x, rigidbody.velocity.y, up);
+			// Apply movement velocity
 
-				if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0){
-					animator.SetBool("walking", true);
-				}else{
-					animator.SetBool("walking", false);
+			rigidbody.velocity = new Vector3 (Input.GetAxis ("Horizontal") * speed.x, rigidbody.velocity.y, up);
+
+			if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0){
+				animator.SetBool("walking", true);
+			}else{
+				animator.SetBool("walking", false);
+			}
+
+			// Mirror animations
+
+			if(Input.GetAxis("Horizontal") > 0){
+				transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 180f, transform.localEulerAngles.z);
+			}
+
+			if(Input.GetAxis("Horizontal") < 0){
+				transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 0f, transform.localEulerAngles.z);
+			}
+
+			// Blink randomly
+
+			if(Random.value < 0.02){
+				animator.SetTrigger("blink");
+			}
+
+			// Punch
+
+			if(Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
+				punchTime = Time.time;
+				animator.SetTrigger("punch");
+
+				Transform closest = Util.FindClosestWithTag(transform, "Enemy", new Vector3(1f, 2f, 2f));
+				
+				if(closest){
+					closest.rigidbody.AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
+
+					Enemy enemy = closest.GetComponent<Enemy>();
+					enemy.Hit (1f, direction);
+					if(enemy.health <= 0f){
+						animator.SetTrigger("punchhard");
+					}
 				}
+			}
+			
+			/*
+			if(Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
+				punchTime = Time.time;
+				animator.SetTrigger("punch");
+				Vector3 forward = transform.TransformDirection(Vector3.left);
+				RaycastHit hit;
+				if(Physics.Raycast(transform.position, forward, out hit)){
+					if(hit.distance <= punchDistance){
+						hit.rigidbody.AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
 
-				// Mirror animations
-
-				if(Input.GetAxis("Horizontal") > 0){
-					transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 180f, transform.localEulerAngles.z);
-				}
-
-				if(Input.GetAxis("Horizontal") < 0){
-					transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 0f, transform.localEulerAngles.z);
-				}
-
-				// Blink randomly
-
-				if(Random.value < 0.02){
-					animator.SetTrigger("blink");
-				}
-
-				// Punch
-
-				if(Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
-					punchTime = Time.time;
-					animator.SetTrigger("punch");
-					Vector3 forward = transform.TransformDirection(Vector3.left);
-					RaycastHit hit;
-					if(Physics.Raycast(transform.position, forward, out hit)){
-						if(hit.distance <= punchDistance){
-							hit.rigidbody.AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
-
-							if(hit.transform.tag == "Enemy"){
-								Enemy enemy = hit.transform.GetComponent<Enemy>();
-								enemy.Hit (1f, direction);
-								if(enemy.health <= 0f){
-									animator.SetTrigger("punchhard");
-								}
+						if(hit.transform.tag == "Enemy"){
+							Enemy enemy = hit.transform.GetComponent<Enemy>();
+							enemy.Hit (1f, direction);
+							if(enemy.health <= 0f){
+								animator.SetTrigger("punchhard");
 							}
 						}
 					}
-
-					if(carrying){
-						Vector3 originalPosition = carrying.transform.localPosition;
-						iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition + new Vector3(0.5f, 0.1f, 0f), "time", 0.3f, "islocal", true));
-						iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition, "time", 0.3f, "delay", 0.6f, "islocal", true));
-					}
 				}
 
-				if(Input.GetKeyDown(KeyCode.RightShift)){
+				if(carrying){
+					Vector3 originalPosition = carrying.transform.localPosition;
+					iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition + new Vector3(0.5f, 0.1f, 0f), "time", 0.3f, "islocal", true));
+					iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition, "time", 0.3f, "delay", 0.6f, "islocal", true));
+				}
+			}
+			*/
 
-					// Throw
+			if(Input.GetKeyDown(KeyCode.RightShift)){
 
-					if(carrying){
-						carrying.GetComponent<Pickup>().Throw(direction);
-						animator.SetTrigger("throw");
-						carrying = null;
+				// Throw
 
-					// Pick up
+				if(carrying){
+					carrying.GetComponent<Pickup>().Throw(direction);
+					animator.SetTrigger("throw");
+					carrying = null;
 
-					}else{
-						Transform closest = Util.FindClosestWithTag(transform, "Pickup", new Vector3(1f, 9999f, 2f));
+				// Pick up
+
+				}else{
+					Transform closest = Util.FindClosestWithTag(transform, "Pickup", new Vector3(1f, 2f, 2f));
+					
+					if(closest){
+						pickingUp = true;
 						
-						if(closest){
-							pickingUp = true;
-							
-							// Attach to player
-							
-							closest.transform.parent = transform;
-							
-							// Turn off physics
-							
-							closest.rigidbody.detectCollisions = false;
-							closest.rigidbody.isKinematic = true;
-							
-							// Set up some variables for the transition
-							
-							carrying = closest.transform;
-							carryingPosition = new Vector3(transform.position.x, transform.position.y + 0.7f, transform.position.z);
-							pickupDistance = Vector3.Distance (carryingPosition, carrying.position);
-							pickupStartTime = Time.time;
-							pickupPosition = carrying.position;
-							
-							// Start animation
-							
-							animator.SetTrigger("carry");
-						}
+						// Attach to player
+						
+						closest.transform.parent = transform;
+						
+						// Turn off physics
+						
+						closest.rigidbody.detectCollisions = false;
+						closest.rigidbody.isKinematic = true;
+						
+						// Set up some variables for the transition
+						
+						carrying = closest.transform;
+						carryingPosition = new Vector3(transform.position.x, transform.position.y + 0.7f, transform.position.z);
+						pickupDistance = Vector3.Distance (carryingPosition, carrying.position);
+						pickupStartTime = Time.time;
+						pickupPosition = carrying.position;
+						
+						// Start animation
+						
+						animator.SetTrigger("carry");
 					}
+				}
 			}
 		}
 	}
 
 	public void Hit(float damage, float direction){
-		health -= damage;
-		Vector3 dir = new Vector3 (100f * direction, 100f, 0f);
-		rigidbody.AddForce (dir);
-		animator.SetTrigger ("hit");
-		hitTime = Time.time;
+		if(renderer.enabled == true){
+			health -= damage;
+			Vector3 dir = new Vector3 (100f * direction, 100f, 0f);
+			rigidbody.AddForce (dir);
+			animator.SetTrigger ("hit");
+			hitTime = Time.time;
+
+			if(health <= 0){
+				audio.PlayOneShot (dieSound);
+				animator.SetTrigger("die");
+				if(dieTime == 0f){
+					dieTime = Time.time;
+				}
+			}else{
+				audio.PlayOneShot (hitSound);
+			}
+		}
 	}
 	
 	void OnCollisionEnter(Collision collision){
@@ -172,6 +216,7 @@ public class PlayerControls : MonoBehaviour {
 			health = Mathf.Min (health, 5);
 
 			collision.collider.SendMessage ("Eat");
+			audio.PlayOneShot(turkeyEatSound);
 		}
 
 		// Pick up coins
