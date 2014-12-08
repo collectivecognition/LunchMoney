@@ -26,7 +26,7 @@ public class Elevator : MonoBehaviour {
 	// Update is called once per frame
 
 	void Update () {
-		if(playerControls.onElevator){
+		if(true || playerControls.onElevator){
 			if(targetFloor == -1){
 				if(Input.GetKeyDown (KeyCode.Alpha1)){
 					ChangeFloor (0);

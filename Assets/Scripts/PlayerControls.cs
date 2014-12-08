@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerControls : MonoBehaviour {
 	private Animator animator;
 	private Vector3 speed = new Vector3(2, 0, 5);
-	private float punchDistance = 1f;
-	private Vector3 punchForce = new Vector3(100f, 75f, 0f);
+	private float punchDistance = 0.5f;
+	private Vector3 punchForce = new Vector3(30f, 150f, 15f);
+	private float punchDelay = 0.5f;
+	private float punchTime = 0f;
 	private Transform carrying;
 	private Vector3 carryingPosition;
 	private float pickupSpeed = 7f;
@@ -14,8 +17,14 @@ public class PlayerControls : MonoBehaviour {
 	private float pickupDistance;
 	private float pickupDelay = 0.15f;
 	private float pickupStartTime;
-	private Vector3 throwSpeed = new Vector3(1000f, 700f, 0f);
+	private float hitDelay = 0.5f;
+	private float hitTime = 0f;
 
+	public Text coinsText;
+	public AudioClip coinPickupSound;
+
+	[HideInInspector] public float health = 3f;
+	[HideInInspector] public int coins = 0;
 	[HideInInspector] public bool onElevator = false;
 	
 	void Start () {
@@ -24,6 +33,10 @@ public class PlayerControls : MonoBehaviour {
 	}
 
 	void Update () {
+
+		// Update UI
+
+		coinsText.text = coins.ToString();
 
 		// Animate picking up objects
 
@@ -37,7 +50,7 @@ public class PlayerControls : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-			if(!pickingUp){
+			if(!pickingUp && (hitTime == 0 || Time.time - hitTime >= hitDelay)){
 				float direction = transform.localEulerAngles.y == 0 ? -1 : 1;
 				float up = Input.GetAxis ("Vertical") * speed.z;
 	
@@ -69,14 +82,29 @@ public class PlayerControls : MonoBehaviour {
 
 				// Punch
 
-				if(Input.GetKeyDown(KeyCode.Space)){
+				if(Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
+					punchTime = Time.time;
 					animator.SetTrigger("punch");
 					Vector3 forward = transform.TransformDirection(Vector3.left);
 					RaycastHit hit;
 					if(Physics.Raycast(transform.position, forward, out hit)){
 						if(hit.distance <= punchDistance){
 							hit.rigidbody.AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
+
+							if(hit.transform.tag == "Enemy"){
+								Enemy enemy = hit.transform.GetComponent<Enemy>();
+								enemy.Hit (1f, direction);
+								if(enemy.health <= 0f){
+									animator.SetTrigger("punchhard");
+								}
+							}
 						}
+					}
+
+					if(carrying){
+						Vector3 originalPosition = carrying.transform.localPosition;
+						iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition + new Vector3(0.5f, 0.1f, 0f), "time", 0.3f, "islocal", true));
+						iTween.MoveTo (carrying.gameObject, iTween.Hash ("position", originalPosition, "time", 0.3f, "delay", 0.6f, "islocal", true));
 					}
 				}
 
@@ -85,10 +113,7 @@ public class PlayerControls : MonoBehaviour {
 					// Throw
 
 					if(carrying){
-						carrying.transform.parent = null;
-						carrying.rigidbody.detectCollisions = true;
-						carrying.rigidbody.isKinematic = false;
-						carrying.rigidbody.AddForce (new Vector3(throwSpeed.x * direction, throwSpeed.y, throwSpeed.z));
+						carrying.GetComponent<Pickup>().Throw(direction);
 						animator.SetTrigger("throw");
 						carrying = null;
 
@@ -96,7 +121,6 @@ public class PlayerControls : MonoBehaviour {
 
 					}else{
 						Transform closest = Util.FindClosestWithTag(transform, "Pickup", new Vector3(1f, 9999f, 2f));
-						Debug.Log (closest);
 						
 						if(closest){
 							pickingUp = true;
@@ -126,11 +150,36 @@ public class PlayerControls : MonoBehaviour {
 			}
 		}
 	}
+
+	public void Hit(float damage, float direction){
+		health -= damage;
+		Vector3 dir = new Vector3 (100f * direction, 100f, 0f);
+		rigidbody.AddForce (dir);
+		animator.SetTrigger ("hit");
+		hitTime = Time.time;
+	}
 	
 	void OnCollisionEnter(Collision collision){
 		if(collision.collider.tag == "Elevator"){
 			transform.parent = collision.collider.transform;
 			onElevator = true;
+		}
+
+		// Pick up health
+
+		if(collision.collider.tag == "Turkey"){
+			health += 1;
+			health = Mathf.Min (health, 5);
+
+			collision.collider.SendMessage ("Eat");
+		}
+
+		// Pick up coins
+
+		if(collision.collider.tag == "Coin"){
+			coins += 1;
+			collision.collider.SendMessage ("Eat");
+			audio.PlayOneShot(coinPickupSound);
 		}
 	}
 
