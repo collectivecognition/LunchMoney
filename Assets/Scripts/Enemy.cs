@@ -164,6 +164,13 @@ public class Enemy : MonoBehaviour {
 				randPos.x = transform.position.x + 3f;
 			}
 
+			if(randPos.z < transform.position.z - 3f){
+				randPos.z = transform.position.z - 3f;
+			}
+			if(randPos.x > transform.position.z + 3f){
+				randPos.x = transform.position.z + 3f;
+			}
+
 			wanderPosition = randPos;
 		}
 
