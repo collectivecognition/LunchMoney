@@ -4,13 +4,14 @@ using System.Collections;
 public class Enemy : MonoBehaviour {
 	private GameObject player;
 	public Transform coin;
+	public Transform turkey;
 	public AudioClip hitSound;
 	public AudioClip dieSound;
 
 	private bool onElevator;
 	private Animator animator;
 	[HideInInspector] public float health = 3;
-	private float punchDelay = 0.25f;
+	private float punchDelay = 0.15f;
 	private float punchTime = 0f;
 	private float hitDelay = 0.7f;
 	private float hitTime = 0f;
@@ -24,7 +25,7 @@ public class Enemy : MonoBehaviour {
 	private float waitDelay = 0;
 	private Vector3 wanderPosition = Vector3.zero;
 	private Vector3 wanderSpeed = new Vector3(1f, 0, 2f);
-	private Vector3 attackSpeed = new Vector3(3f, 0, 2f);
+	private Vector3 attackSpeed = new Vector3(3f, 0, 7f);
 
 	void Start () {
 		animator = GetComponent<Animator> ();
@@ -42,15 +43,15 @@ public class Enemy : MonoBehaviour {
 			if(state == null){
 				float r = Random.value;
 				
-				if(r <= 0.5f){
+				if(r <= 0f){
 					state = "waiting";
 				}
 				
-				if(r > 0.5f && r < 0.75f){
+				if(r > 0f && r < 0.50f){
 					state = "wandering";
 				}
 				
-				if(r >= 0.75f){
+				if(r >= 0.50f){
 					state = "attacking";
 				}
 			}
@@ -89,11 +90,23 @@ public class Enemy : MonoBehaviour {
 			if(blinkCount > blinkTimes){
 				GameObject.Destroy(gameObject);
 
-				// Spawn a coin when dead
-				
-				Transform newCoin = (Transform)GameObject.Instantiate(coin);
-				newCoin.position = transform.position;
-				newCoin.rigidbody.AddForce(new Vector3(0f, 300f, 0f));
+				if(Random.value > 0.2f){
+
+					// Spawn a coin when dead
+					
+					Transform newCoin = (Transform)GameObject.Instantiate(coin);
+					newCoin.position = transform.position;
+					newCoin.rigidbody.AddForce(new Vector3(0f, 300f, 0f));
+				}else{
+
+					// Spawn a turkey sometimes
+					
+					Transform newTurkey = (Transform)GameObject.Instantiate(turkey);
+					newTurkey.position = transform.position;
+					if(newTurkey.rigidbody){
+						newTurkey.rigidbody.AddForce(new Vector3(0f, 300f, 0f));
+					}
+				}
 			}
 		}
 	}
@@ -144,11 +157,11 @@ public class Enemy : MonoBehaviour {
 		if(wanderPosition == Vector3.zero){
 			Vector3 randPos = Util.RandomPositionOnFloor(0);
 			randPos.y = transform.position.y;
-			if(randPos.y < transform.position.y - 1f){
-				randPos.y = transform.position.y - 1f;
+			if(randPos.x < transform.position.x - 3f){
+				randPos.x = transform.position.x - 3f;
 			}
-			if(randPos.y > transform.position.y + 1f){
-				randPos.y = transform.position.y + 1f;
+			if(randPos.x > transform.position.x + 3f){
+				randPos.x = transform.position.x + 3f;
 			}
 
 			wanderPosition = randPos;
@@ -165,14 +178,15 @@ public class Enemy : MonoBehaviour {
 	private void Punch(){
 		if(Time.time > punchTime + punchDelay){
 			animator.SetTrigger ("punch");
+			Face (player.transform.position);
 
 			float distance = Vector3.Distance (transform.position, player.transform.position);
-			if(distance <= 0.5f){
+			if(distance <= 0.7f){
 				player.GetComponent<PlayerControls>().Hit(0.5f, Mathf.Sign (player.transform.position.x - transform.position.x));
 			}
 
-			state = "wandering";
-			wanderPosition = Vector3.zero;
+			state = null;
+			// wanderPosition = Vector3.zero;
 		}
 	}
 
@@ -188,21 +202,26 @@ public class Enemy : MonoBehaviour {
 	}
 	
 	public void Hit(float damage, float direction){
-		health -= damage;
-		hitTime = Time.time;
-
 		if(health > 0){
-			audio.PlayOneShot(hitSound);
-			Vector3 dir = new Vector3 (10f * direction, 10f, 0f);
-			rigidbody.AddForce (dir);
-			animator.SetTrigger ("hurt");
-		}else{
-			audio.PlayOneShot(dieSound);
-			dead = true;
-			blinkTime = Time.time + 2f;
-			animator.SetTrigger ("kill");
-			Vector3 dir = new Vector3 (20f * direction, 10f, 0f);
-			rigidbody.AddForce (dir);
+			health -= damage;
+			hitTime = Time.time;
+
+			if(health > 0){
+				audio.PlayOneShot(hitSound);
+				Vector3 dir = new Vector3 (10f * direction, 10f, 0f);
+				rigidbody.AddForce (dir);
+				animator.SetTrigger ("hurt");
+			}else{
+				audio.PlayOneShot(dieSound);
+				dead = true;
+				blinkTime = Time.time + 2f;
+				animator.SetTrigger ("kill");
+				Vector3 dir = new Vector3 (20f * direction, 10f, 0f);
+				rigidbody.AddForce (dir);
+			}
+
+			state = "attacking";
+			wanderPosition = Vector3.zero;
 		}
 	}
 

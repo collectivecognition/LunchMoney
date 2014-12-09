@@ -46,6 +46,7 @@ public class Health : MonoBehaviour {
 			turkey3.sprite = whole;
 		}
 
+		/*
 		if(health < 3.5){ turkey4.sprite = empty; }
 		if(health >= 3.5){
 			turkey4.sprite = half;
@@ -61,5 +62,6 @@ public class Health : MonoBehaviour {
 		if(health >= 5){
 			turkey5.sprite = whole;
 		}
+		*/
 	}
 }

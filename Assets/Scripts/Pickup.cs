@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Pickup : MonoBehaviour {
-	private Vector3 throwSpeed = new Vector3(700f, 200f, 0f);
+	private Vector3 throwSpeed = new Vector3(700f, 50f, 0f);
 	private float layerResetDelay = 2f;
 	private float layerResetTime = 0f;
 	public AudioClip thudSound;
@@ -20,6 +20,13 @@ public class Pickup : MonoBehaviour {
 		rigidbody.AddForce (new Vector3(throwSpeed.x * direction, throwSpeed.y, throwSpeed.z));
 		gameObject.layer = LayerMask.NameToLayer ("CollidablePickups");
 		layerResetTime = Time.time;
+	}
+
+	public void Drop(){
+		transform.parent = null;
+		rigidbody.detectCollisions = true;
+		rigidbody.isKinematic = false;
+		rigidbody.AddForce (Vector3.down * 0.1f);
 	}
 
 	void OnCollisionEnter(Collision collision){

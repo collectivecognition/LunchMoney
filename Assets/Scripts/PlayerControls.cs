@@ -46,7 +46,7 @@ public class PlayerControls : MonoBehaviour {
 
 		// Animate picking up objects
 
-		if(pickingUp && Time.time > pickupStartTime + pickupDelay){
+		if(carrying && pickingUp && Time.time > pickupStartTime + pickupDelay){
 			carrying.transform.position = Vector3.Lerp(pickupPosition, carryingPosition, (Time.time - pickupStartTime - pickupDelay) * pickupSpeed / pickupDistance);
 			// carrying.transform.rotation = Quaternion.RotateTowards (carrying.transform.rotation, Quaternion.AngleAxis(90, Vector3.forward), pickupSpeed);
 			if(carrying.transform.position == carryingPosition){
@@ -57,6 +57,9 @@ public class PlayerControls : MonoBehaviour {
 
 	void FixedUpdate () {
 		if(health <= 0 && Time.time - dieTime >= dieDelay && gameObject.renderer.enabled == true){
+			if(coins > PlayerPrefs.GetInt("HiScore")){
+				PlayerPrefs.SetInt ("HiScore", coins);
+			}
 			Transform deadGirlObj = (Transform)GameObject.Instantiate(deadGirl);
 			deadGirlObj.rigidbody.velocity = rigidbody.velocity;
 			deadGirlObj.transform.position = transform.position;
@@ -95,7 +98,7 @@ public class PlayerControls : MonoBehaviour {
 
 			// Punch
 
-			if(Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
+			if(false && Input.GetKeyDown(KeyCode.Space) && !carrying && (punchTime == 0 || Time.time - punchTime >= punchDelay)){
 				punchTime = Time.time;
 				animator.SetTrigger("punch");
 
@@ -140,7 +143,7 @@ public class PlayerControls : MonoBehaviour {
 			}
 			*/
 
-			if(Input.GetKeyDown(KeyCode.RightShift)){
+			if(Input.GetKeyDown(KeyCode.Space)){
 
 				// Throw
 
@@ -200,6 +203,11 @@ public class PlayerControls : MonoBehaviour {
 			}else{
 				audio.PlayOneShot (hitSound);
 			}
+
+			if(carrying){
+				carrying.GetComponent<Pickup>().Drop();
+				carrying = null;
+			}
 		}
 	}
 	
@@ -213,7 +221,7 @@ public class PlayerControls : MonoBehaviour {
 
 		if(collision.collider.tag == "Turkey"){
 			health += 1;
-			health = Mathf.Min (health, 5);
+			health = Mathf.Min (health, 3);
 
 			collision.collider.SendMessage ("Eat");
 			audio.PlayOneShot(turkeyEatSound);

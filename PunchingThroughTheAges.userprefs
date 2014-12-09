@@ -1,18 +1,19 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Enemy.cs">
     <Files>
-      <File FileName="Assets/Scripts/PlayerControls.cs" Line="173" Column="4" />
-      <File FileName="Assets/Scripts/Enemy.cs" Line="18" Column="1" />
-      <File FileName="Assets/Scripts/Elevator.cs" Line="4" Column="40" />
-      <File FileName="Assets/Scripts/Util.cs" Line="22" Column="32" />
-      <File FileName="Assets/Scripts/Health.cs" Line="9" Column="23" />
+      <File FileName="Assets/Scripts/PlayerControls.cs" Line="205" Column="42" />
+      <File FileName="Assets/Scripts/Enemy.cs" Line="106" Column="15" />
+      <File FileName="Assets/Scripts/Elevator.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Util.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Health.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/Turkey.cs" Line="1" Column="1" />
       <File FileName="Assets/Plugins/Pixelplacement/iTween/iTween.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Edible.cs" Line="18" Column="1" />
-      <File FileName="Assets/Scripts/Pickup.cs" Line="26" Column="83" />
-      <File FileName="Assets/Scripts/BullySpawner.cs" Line="34" Column="1" />
-      <File FileName="Assets/Scripts/PressSpace.cs" Line="4" Column="1" />
+      <File FileName="Assets/Scripts/Edible.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Pickup.cs" Line="22" Column="14" />
+      <File FileName="Assets/Scripts/BullySpawner.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/PressSpace.cs" Line="15" Column="4" />
+      <File FileName="Assets/Scripts/DeadGirl.cs" Line="29" Column="33" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

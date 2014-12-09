@@ -5,8 +5,8 @@ public class Util
 {
 	public static float floorMinX = -9f;
 	public static float floorMaxX = 9f;
-	public static float[] floorMinZ = new float[] {-3.4f};
-	public static float[] floorMaxZ = new float[] {-5.7f};
+	public static float[] floorMinZ = new float[] {14.6f};
+	public static float[] floorMaxZ = new float[] {-7.7f};
 
 	public static Transform FindClosestWithTag(Transform player, string tag, Vector3 maxDistance){
 		GameObject[] pickups = GameObject.FindGameObjectsWithTag(tag);
