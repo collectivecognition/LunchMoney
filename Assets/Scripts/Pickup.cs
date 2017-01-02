@@ -15,23 +15,23 @@ public class Pickup : MonoBehaviour {
 
 	public void Throw(float direction) {
 		transform.parent = null;
-		rigidbody.detectCollisions = true;
-		rigidbody.isKinematic = false;
-		rigidbody.AddForce (new Vector3(throwSpeed.x * direction, throwSpeed.y, throwSpeed.z));
+		GetComponent<Rigidbody>().detectCollisions = true;
+		GetComponent<Rigidbody>().isKinematic = false;
+		GetComponent<Rigidbody>().AddForce (new Vector3(throwSpeed.x * direction, throwSpeed.y, throwSpeed.z));
 		gameObject.layer = LayerMask.NameToLayer ("CollidablePickups");
 		layerResetTime = Time.time;
 	}
 
 	public void Drop(){
 		transform.parent = null;
-		rigidbody.detectCollisions = true;
-		rigidbody.isKinematic = false;
-		rigidbody.AddForce (Vector3.down * 0.1f);
+		GetComponent<Rigidbody>().detectCollisions = true;
+		GetComponent<Rigidbody>().isKinematic = false;
+		GetComponent<Rigidbody>().AddForce (Vector3.down * 0.1f);
 	}
 
 	void OnCollisionEnter(Collision collision){
 		if(collision.collider.name != "Girl" & collision.relativeVelocity.magnitude > 2f){
-			audio.PlayOneShot (thudSound);
+			GetComponent<AudioSource>().PlayOneShot (thudSound);
 		}
 	}
 }

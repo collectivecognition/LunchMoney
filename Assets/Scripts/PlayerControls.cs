@@ -56,15 +56,15 @@ public class PlayerControls : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if(health <= 0 && Time.time - dieTime >= dieDelay && gameObject.renderer.enabled == true){
+		if(health <= 0 && Time.time - dieTime >= dieDelay && gameObject.GetComponent<Renderer>().enabled == true){
 			if(coins > PlayerPrefs.GetInt("HiScore")){
 				PlayerPrefs.SetInt ("HiScore", coins);
 			}
 			Transform deadGirlObj = (Transform)GameObject.Instantiate(deadGirl);
-			deadGirlObj.rigidbody.velocity = rigidbody.velocity;
+			deadGirlObj.GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity;
 			deadGirlObj.transform.position = transform.position;
 			// gameObject.SetActive (false);
-			gameObject.renderer.enabled = false;
+			gameObject.GetComponent<Renderer>().enabled = false;
 		}
 		if(health > 0 && !pickingUp && (hitTime == 0 || Time.time - hitTime >= hitDelay)){
 			float direction = transform.localEulerAngles.y == 0 ? -1 : 1;
@@ -72,7 +72,7 @@ public class PlayerControls : MonoBehaviour {
 
 			// Apply movement velocity
 
-			rigidbody.velocity = new Vector3 (Input.GetAxis ("Horizontal") * speed.x, rigidbody.velocity.y, up);
+			GetComponent<Rigidbody>().velocity = new Vector3 (Input.GetAxis ("Horizontal") * speed.x, GetComponent<Rigidbody>().velocity.y, up);
 
 			if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0){
 				animator.SetBool("walking", true);
@@ -105,7 +105,7 @@ public class PlayerControls : MonoBehaviour {
 				Transform closest = Util.FindClosestWithTag(transform, "Enemy", new Vector3(1f, 2f, 2f));
 				
 				if(closest){
-					closest.rigidbody.AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
+					closest.GetComponent<Rigidbody>().AddForce (new Vector3(punchForce.x * direction, punchForce.y, punchForce.z));
 
 					Enemy enemy = closest.GetComponent<Enemy>();
 					enemy.Hit (1f, direction);
@@ -166,8 +166,8 @@ public class PlayerControls : MonoBehaviour {
 						
 						// Turn off physics
 						
-						closest.rigidbody.detectCollisions = false;
-						closest.rigidbody.isKinematic = true;
+						closest.GetComponent<Rigidbody>().detectCollisions = false;
+						closest.GetComponent<Rigidbody>().isKinematic = true;
 						
 						// Set up some variables for the transition
 						
@@ -187,21 +187,21 @@ public class PlayerControls : MonoBehaviour {
 	}
 
 	public void Hit(float damage, float direction){
-		if(renderer.enabled == true){
+		if(GetComponent<Renderer>().enabled == true){
 			health -= damage;
 			Vector3 dir = new Vector3 (100f * direction, 100f, 0f);
-			rigidbody.AddForce (dir);
+			GetComponent<Rigidbody>().AddForce (dir);
 			animator.SetTrigger ("hit");
 			hitTime = Time.time;
 
 			if(health <= 0){
-				audio.PlayOneShot (dieSound);
+				GetComponent<AudioSource>().PlayOneShot (dieSound);
 				animator.SetTrigger("die");
 				if(dieTime == 0f){
 					dieTime = Time.time;
 				}
 			}else{
-				audio.PlayOneShot (hitSound);
+				GetComponent<AudioSource>().PlayOneShot (hitSound);
 			}
 
 			if(carrying){
@@ -224,7 +224,7 @@ public class PlayerControls : MonoBehaviour {
 			health = Mathf.Min (health, 3);
 
 			collision.collider.SendMessage ("Eat");
-			audio.PlayOneShot(turkeyEatSound);
+			GetComponent<AudioSource>().PlayOneShot(turkeyEatSound);
 		}
 
 		// Pick up coins
@@ -232,7 +232,7 @@ public class PlayerControls : MonoBehaviour {
 		if(collision.collider.tag == "Coin"){
 			coins += 1;
 			collision.collider.SendMessage ("Eat");
-			audio.PlayOneShot(coinPickupSound);
+			GetComponent<AudioSource>().PlayOneShot(coinPickupSound);
 		}
 	}
 

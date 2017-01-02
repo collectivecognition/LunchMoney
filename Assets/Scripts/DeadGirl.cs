@@ -16,11 +16,11 @@ public class DeadGirl : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(Time.time > blinkTime + blinkDelay){
-			renderer.enabled = false;
+			GetComponent<Renderer>().enabled = false;
 		}
 		
 		if(Time.time > blinkTime + blinkDelay * 2){
-			renderer.enabled = true;
+			GetComponent<Renderer>().enabled = true;
 			blinkCount++;
 			blinkTime = Time.time;
 		}

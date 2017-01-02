@@ -78,11 +78,11 @@ public class Enemy : MonoBehaviour {
 			// Do some dying
 
 			if(Time.time > blinkTime + blinkDelay){
-				renderer.enabled = false;
+				GetComponent<Renderer>().enabled = false;
 			}
 
 			if(Time.time > blinkTime + blinkDelay * 2){
-				renderer.enabled = true;
+				GetComponent<Renderer>().enabled = true;
 				blinkCount++;
 				blinkTime = Time.time;
 			}
@@ -96,15 +96,15 @@ public class Enemy : MonoBehaviour {
 					
 					Transform newCoin = (Transform)GameObject.Instantiate(coin);
 					newCoin.position = transform.position;
-					newCoin.rigidbody.AddForce(new Vector3(0f, 300f, 0f));
+					newCoin.GetComponent<Rigidbody>().AddForce(new Vector3(0f, 300f, 0f));
 				}else{
 
 					// Spawn a turkey sometimes
 					
 					Transform newTurkey = (Transform)GameObject.Instantiate(turkey);
 					newTurkey.position = transform.position;
-					if(newTurkey.rigidbody){
-						newTurkey.rigidbody.AddForce(new Vector3(0f, 300f, 0f));
+					if(newTurkey.GetComponent<Rigidbody>()){
+						newTurkey.GetComponent<Rigidbody>().AddForce(new Vector3(0f, 300f, 0f));
 					}
 				}
 			}
@@ -214,17 +214,17 @@ public class Enemy : MonoBehaviour {
 			hitTime = Time.time;
 
 			if(health > 0){
-				audio.PlayOneShot(hitSound);
+				GetComponent<AudioSource>().PlayOneShot(hitSound);
 				Vector3 dir = new Vector3 (10f * direction, 10f, 0f);
-				rigidbody.AddForce (dir);
+				GetComponent<Rigidbody>().AddForce (dir);
 				animator.SetTrigger ("hurt");
 			}else{
-				audio.PlayOneShot(dieSound);
+				GetComponent<AudioSource>().PlayOneShot(dieSound);
 				dead = true;
 				blinkTime = Time.time + 2f;
 				animator.SetTrigger ("kill");
 				Vector3 dir = new Vector3 (20f * direction, 10f, 0f);
-				rigidbody.AddForce (dir);
+				GetComponent<Rigidbody>().AddForce (dir);
 			}
 
 			state = "attacking";
